@@ -1,22 +1,34 @@
 from fastapi import FastAPI
 from typing import Union
+from fastapi.params import Body
+from dotenv import load_dotenv
 import json
+import os
+
+load_dotenv()
+api_key = os.getenv("SECRET_API_KEY")
 app = FastAPI()
 
+with open("user.json", "r") as json_file:
+    Users_data = json.load(json_file)
 
-users = [
-                {"id": 1, "Name": "Sarah", "Age": 34, "Gender": "f"},
-                {"id": 2, "Name": "Maha", "Age": 15, "Gender": "f"},
-                {"id": 3, "Name": "Ali", "Age": 40, "Gender": "m"},
-                {"id": 4, "Name": "Tahir", "Age": 63, "Gender": 'm'},
-                {"id": 5, "Name": "Ayesha", "Age": 25, "Gender": "f"},
-                {"id": 6, "Name": "Zahid", "Age": 23, "Gender": "m"},
-             ]
+
 @app.get("/")
 def home():
-    return "Home Route"
+    return {"Home Route"}
+
+
 @app.get("/Users_data")
-def user_data(data=users):
-    new_data = json.dumps(data)
-    return new_data
+def user_data():
+    return Users_data
+
+
+@app.post("/post")
+def post():
+    return {"Message": "Post Created"}
+@app.post("/Add_Users_data")
+def add_data(turtle: dict = Body(...)):
+    return {turtle["id"]}
+
+
 
