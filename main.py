@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from pydantic import BaseModel
 import json
@@ -7,6 +8,14 @@ import uuid
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization"]
+)
 
 
 class Item(BaseModel):
@@ -41,15 +50,16 @@ async def add_data(item: Item, request: Request):
         return "Unauthorized access"
     elif not api:
         return "API_Key needed"
-    elif api == api_key:
-        session_id = str(uuid.uuid4())
-        user_info = {"id": session_id, "Name": item.Name, "Age": item.Age, "Gender": item.Gender}
-        Users_data.append(user_info)
-        with open("user.json", "w") as new_user_file:
-            json.dump(Users_data, new_user_file, indent=4)
-        return f"Authorization Successful: Your session_id is {session_id}"
-
-
+    elif api == api_key :
+        try:
+            session_id = str(uuid.uuid4())
+            user_info = {"id": session_id, "Name": item.Name, "Age": item.Age, "Gender": item.Gender}
+            Users_data.append(user_info)
+            with open("user.json", "w") as new_user_file:
+                json.dump(Users_data, new_user_file, indent=4)
+            return f"Authorization Successful: Your session_id is {session_id}"
+        except Exception:
+            return "Message: Error Occured"
 @app.post("/Get_User_Information")
 async def get_data(item: Item, request: Request):
     api = request.headers.get("Authorization")
@@ -58,13 +68,16 @@ async def get_data(item: Item, request: Request):
     elif not api:
         return "Api Key needed"
     elif api == api_key:
-        with open("user.json", "r") as file:
-            users_information = json.load(file)
-        for i in users_information:
-            if i["id"] == item.id:
-                return {"Name": i["Name"], "Age": i["Age"], "Gender": i["Gender"]}
-                break
-        return {"Error Occured: Session_id does not exist"}
+        try:
+            with open("user.json", "r") as file:
+                users_information = json.load(file)
+            for i in users_information:
+                if i["id"] == item.id:
+                    return {"Name": i["Name"], "Age": i["Age"], "Gender": i["Gender"]}
+                    break
+        except Exception:
+            return "Message: Error Occured"
+    return {"Error Occured: Session_id does not exist"}
 
 
 
