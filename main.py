@@ -75,9 +75,10 @@ async def get_data(item: Item, request: Request):
                 if i["id"] == item.id:
                     return {"Name": i["Name"], "Age": i["Age"], "Gender": i["Gender"]}
                     break
+                return {"Error Occured: Session_id does not exist"}
         except Exception:
             return "Message: Error Occured"
-    return {"Error Occured: Session_id does not exist"}
+
 
 
 
